@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.qainnovators.smartnotes.ui.screens.AboutScreen
 import com.qainnovators.smartnotes.ui.screens.AddEditNoteScreen
 import com.qainnovators.smartnotes.ui.screens.NoteDetailScreen
 import com.qainnovators.smartnotes.ui.screens.NoteListScreen
@@ -28,8 +29,15 @@ fun NavGraph(
                 },
                 onAddClick = {
                     navController.navigate(Screen.AddEditNote.createRoute())
+                },
+                onAboutClick = {
+                    navController.navigate(Screen.About.route)
                 }
             )
+        }
+
+        composable(route = Screen.About.route) {
+            AboutScreen(onBackClick = { navController.popBackStack() })
         }
 
         composable(
@@ -43,12 +51,8 @@ fun NavGraph(
                 onEditClick = { id ->
                     navController.navigate(Screen.AddEditNote.createRoute(id))
                 },
-                onDeleteClick = {
-                    navController.popBackStack()
-                },
-                onBackClick = {
-                    navController.popBackStack()
-                }
+                onDeleteClick = { navController.popBackStack() },
+                onBackClick = { navController.popBackStack() }
             )
         }
 
@@ -63,12 +67,8 @@ fun NavGraph(
             AddEditNoteScreen(
                 noteId = noteId,
                 viewModel = viewModel,
-                onSaveClick = {
-                    navController.popBackStack()
-                },
-                onBackClick = {
-                    navController.popBackStack()
-                }
+                onSaveClick = { navController.popBackStack() },
+                onBackClick = { navController.popBackStack() }
             )
         }
     }
