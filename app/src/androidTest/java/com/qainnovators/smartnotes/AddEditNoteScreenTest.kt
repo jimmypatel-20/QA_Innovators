@@ -15,7 +15,7 @@ class AddEditNoteScreenTest {
 
     private fun navigateToAddScreen() {
         composeTestRule
-            .onNodeWithContentDescription("Add Note")
+            .onNodeWithText("Add")
             .performClick()
     }
 
@@ -91,6 +91,39 @@ class AddEditNoteScreenTest {
     }
 
     @Test
+    fun testCategoryChipsDisplayedOnAddScreen() {
+        navigateToAddScreen()
+        composeTestRule
+            .onNodeWithText("Work")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("Study")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("Personal")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("Ideas")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun testTitleCharacterCounterDisplayed() {
+        navigateToAddScreen()
+        composeTestRule
+            .onNodeWithText("0/100")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun testDescriptionCharacterCounterDisplayed() {
+        navigateToAddScreen()
+        composeTestRule
+            .onNodeWithText("0/500")
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun testEditModePrePopulatesFields() {
         navigateToAddScreen()
         composeTestRule
@@ -114,18 +147,10 @@ class AddEditNoteScreenTest {
     }
 
     @Test
-    fun testCharacterCounterDisplayedForTitle() {
+    fun testTemplateChipsDisplayed() {
         navigateToAddScreen()
         composeTestRule
-            .onNodeWithText("0/100")
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun testCharacterCounterDisplayedForDescription() {
-        navigateToAddScreen()
-        composeTestRule
-            .onNodeWithText("0/500")
+            .onNodeWithText("Templates")
             .assertIsDisplayed()
     }
 }

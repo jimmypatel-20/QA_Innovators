@@ -21,6 +21,10 @@ import com.qainnovators.smartnotes.viewmodel.NoteViewModel
 import com.qainnovators.smartnotes.viewmodel.SortOrder
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,8 +42,8 @@ fun NoteListScreen(
 
     var showMenu by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
-    var deletedNote by remember { mutableStateOf<Note?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     val categories = listOf("All", "Work", "Study", "Personal", "Ideas")
 
@@ -54,7 +58,6 @@ fun NoteListScreen(
                     )
                 },
                 actions = {
-                    // 3-dot menu
                     IconButton(onClick = { showMenu = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
@@ -103,8 +106,6 @@ fun NoteListScreen(
                             }
                         )
                     }
-
-                    // Sort submenu
                     DropdownMenu(
                         expanded = showSortMenu,
                         onDismissRequest = { showSortMenu = false }
@@ -151,27 +152,23 @@ fun NoteListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = onAddClick,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
+                containerColor = MaterialTheme.colorScheme.primary,
+                icon = {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        Icons.Default.Add,
                         contentDescription = "Add Note",
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
+                },
+                text = {
                     Text(
-                        text = "Add",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.labelLarge
+                        "Add",
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-            }
+            )
         }
     ) { paddingValues ->
         Column(
@@ -190,7 +187,7 @@ fun NoteListScreen(
                 trailingIcon = {
                     if (searchQuery.isNotBlank()) {
                         IconButton(onClick = { viewModel.setSearchQuery("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear")
+                            Icon(Icons.Default.Clear, contentDescription = "Clear search")
                         }
                     }
                 },
@@ -222,7 +219,9 @@ fun NoteListScreen(
 
             if (notes.isEmpty()) {
                 Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -234,7 +233,8 @@ fun NoteListScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = if (searchQuery.isNotBlank()) "No notes match your search"
+                            text = if (searchQuery.isNotBlank())
+                                "No notes match your search"
                             else "No notes yet. Tap + to add one!",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -242,7 +242,7 @@ fun NoteListScreen(
                     }
                 }
             } else {
-                // Recent notes label
+                // Notes count label
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -267,11 +267,24 @@ fun NoteListScreen(
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(notes, key = { it.id }) { note ->
-                        NoteCard(
+                        SwipeToDeleteNoteCard(
                             note = note,
                             onClick = { onNoteClick(note.id) },
                             onPinClick = { viewModel.togglePin(note) },
-                            onFavouriteClick = { viewModel.toggleFavourite(note) }
+                            onFavouriteClick = { viewModel.toggleFavourite(note) },
+                            onDelete = {
+                                viewModel.deleteNote(note)
+                                scope.launch {
+                                    val result = snackbarHostState.showSnackbar(
+                                        message = "Note deleted",
+                                        actionLabel = "Undo",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                    if (result == SnackbarResult.ActionPerformed) {
+                                        viewModel.insertNote(note)
+                                    }
+                                }
+                            }
                         )
                     }
                 }
@@ -302,6 +315,74 @@ fun NoteListScreen(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SwipeToDeleteNoteCard(
+    note: Note,
+    onClick: () -> Unit,
+    onPinClick: () -> Unit,
+    onFavouriteClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                onDelete()
+                true
+            } else false
+        }
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxSize(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(end = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "Delete",
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    ) {
+        NoteCard(
+            note = note,
+            onClick = onClick,
+            onPinClick = onPinClick,
+            onFavouriteClick = onFavouriteClick
+        )
     }
 }
 
@@ -354,15 +435,22 @@ fun NoteCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-                Row {
-                    // Pin icon
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (note.isLocked) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Locked",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
                     IconButton(
                         onClick = onPinClick,
                         modifier = Modifier.size(20.dp)
                     ) {
                         Icon(
-                            imageVector = if (note.isPinned) Icons.Default.PushPin
-                            else Icons.Default.PushPin,
+                            imageVector = Icons.Default.PushPin,
                             contentDescription = "Pin",
                             tint = if (note.isPinned) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
@@ -370,7 +458,6 @@ fun NoteCard(
                         )
                     }
                     Spacer(modifier = Modifier.width(4.dp))
-                    // Favourite icon
                     IconButton(
                         onClick = onFavouriteClick,
                         modifier = Modifier.size(20.dp)
@@ -410,7 +497,6 @@ fun NoteCard(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                // Category badge
                 Surface(
                     shape = MaterialTheme.shapes.small,
                     color = categoryColor
