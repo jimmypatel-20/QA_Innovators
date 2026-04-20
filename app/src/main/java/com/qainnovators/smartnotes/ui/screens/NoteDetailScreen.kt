@@ -21,6 +21,7 @@ import com.qainnovators.smartnotes.data.Note
 import com.qainnovators.smartnotes.viewmodel.NoteViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,7 +107,7 @@ fun NoteDetailScreen(
                                         "Note", "${it.title}\n\n${it.description}"
                                     )
                                     clipboard.setPrimaryClip(clip)
-                                    scope.launch {
+                                    kotlinx.coroutines.MainScope().launch {
                                         snackbarHostState.showSnackbar(
                                             "Note copied to clipboard"
                                         )
@@ -161,7 +162,7 @@ fun NoteDetailScreen(
                                 showMenu = false
                                 note?.let {
                                     viewModel.duplicateNote(it)
-                                    scope.launch {
+                                    kotlinx.coroutines.MainScope().launch {
                                         snackbarHostState.showSnackbar("Note duplicated")
                                     }
                                 }

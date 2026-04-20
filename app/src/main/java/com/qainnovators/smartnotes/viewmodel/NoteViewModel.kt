@@ -23,6 +23,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     val isDarkMode = MutableStateFlow(false)
 
     val allNotes: StateFlow<List<Note>>
+    val trashedNotes: StateFlow<List<Note>>
 
     init {
         val noteDao = AppDatabase.getDatabase(application).noteDao()
@@ -47,45 +48,52 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-        val trashedNotes: StateFlow<List<Note>> = repository.trashedNotes.stateIn(
+
+        trashedNotes = repository.trashedNotes.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-
-        fun deleteNote(note: Note) = viewModelScope.launch {
-            repository.deleteNote(note)
-        }
-
-        fun restoreNote(note: Note) = viewModelScope.launch {
-            repository.restoreNote(note)
-        }
-
-        fun permanentlyDeleteNote(note: Note) = viewModelScope.launch {
-            repository.permanentlyDeleteNote(note)
-        }
-
-        fun clearTrash() = viewModelScope.launch {
-            repository.clearTrash()
-        }
-
-        fun duplicateNote(note: Note) = viewModelScope.launch {
-            repository.insertNote(
-                note.copy(
-                    id = 0,
-                    title = "${note.title} (copy)",
-                    timestamp = System.currentTimeMillis(),
-                    lastEdited = System.currentTimeMillis()
-                )
-            )
-        }
     }
 
-    fun insertNote(note: Note) = viewModelScope.launch { repository.insertNote(note) }
-    fun updateNote(note: Note) = viewModelScope.launch { repository.updateNote(note) }
-    fun deleteNote(note: Note) = viewModelScope.launch { repository.deleteNote(note) }
+    fun insertNote(note: Note) = viewModelScope.launch {
+        repository.insertNote(note)
+    }
 
-    suspend fun getNoteById(id: Int): Note? = repository.getNoteById(id)
+    fun updateNote(note: Note) = viewModelScope.launch {
+        repository.updateNote(note)
+    }
+
+    fun deleteNote(note: Note) = viewModelScope.launch {
+        repository.deleteNote(note)
+    }
+
+    fun restoreNote(note: Note) = viewModelScope.launch {
+        repository.restoreNote(note)
+    }
+
+    fun permanentlyDeleteNote(note: Note) = viewModelScope.launch {
+        repository.permanentlyDeleteNote(note)
+    }
+
+    fun clearTrash() = viewModelScope.launch {
+        repository.clearTrash()
+    }
+
+    fun duplicateNote(note: Note) = viewModelScope.launch {
+        repository.insertNote(
+            note.copy(
+                id = 0,
+                title = "${note.title} (copy)",
+                timestamp = System.currentTimeMillis(),
+                lastEdited = System.currentTimeMillis()
+            )
+        )
+    }
+
+    suspend fun getNoteById(id: Int): Note? {
+        return repository.getNoteById(id)
+    }
 
     fun togglePin(note: Note) = viewModelScope.launch {
         repository.updateNote(note.copy(isPinned = !note.isPinned))

@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 val Purple10 = Color(0xFF21005E)
 val Purple20 = Color(0xFF381E72)
 val Purple30 = Color(0xFF4F378B)
-val Purple40 = Color(0xFF6650A4)
+val Purple40 = Color(0xFF096BFF)
 val Purple80 = Color(0xFFD0BCFF)
 val Purple90 = Color(0xFFEADDFF)
 val Purple95 = Color(0xFFF6EDFF)

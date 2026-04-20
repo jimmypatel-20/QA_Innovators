@@ -78,24 +78,19 @@ fun NavGraph(
             )
         }
 
-        composable(route = Screen.NoteList.route) {
-            NoteListScreen(
+        composable(
+            route = Screen.AddEditNote.route,
+            arguments = listOf(navArgument("noteId") {
+                type = NavType.IntType
+                defaultValue = -1
+            })
+        ) { backStackEntry ->
+            val noteId = backStackEntry.arguments?.getInt("noteId") ?: -1
+            AddEditNoteScreen(
+                noteId = noteId,
                 viewModel = viewModel,
-                onNoteClick = { noteId ->
-                    navController.navigate(Screen.NoteDetail.createRoute(noteId))
-                },
-                onAddClick = {
-                    navController.navigate(Screen.AddEditNote.createRoute())
-                },
-                onAboutClick = {
-                    navController.navigate(Screen.About.route)
-                },
-                onStatsClick = {
-                    navController.navigate(Screen.Stats.route)
-                },
-                onTrashClick = {
-                    navController.navigate(Screen.Trash.route)
-                }
+                onSaveClick = { navController.popBackStack() },
+                onBackClick = { navController.popBackStack() }
             )
         }
     }
