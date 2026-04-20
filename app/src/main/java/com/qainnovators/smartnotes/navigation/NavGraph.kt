@@ -10,6 +10,8 @@ import com.qainnovators.smartnotes.ui.screens.AboutScreen
 import com.qainnovators.smartnotes.ui.screens.AddEditNoteScreen
 import com.qainnovators.smartnotes.ui.screens.NoteDetailScreen
 import com.qainnovators.smartnotes.ui.screens.NoteListScreen
+import com.qainnovators.smartnotes.ui.screens.StatsScreen
+import com.qainnovators.smartnotes.ui.screens.TrashScreen
 import com.qainnovators.smartnotes.viewmodel.NoteViewModel
 
 @Composable
@@ -32,12 +34,32 @@ fun NavGraph(
                 },
                 onAboutClick = {
                     navController.navigate(Screen.About.route)
+                },
+                onStatsClick = {
+                    navController.navigate(Screen.Stats.route)
+                },
+                onTrashClick = {
+                    navController.navigate(Screen.Trash.route)
                 }
             )
         }
 
         composable(route = Screen.About.route) {
             AboutScreen(onBackClick = { navController.popBackStack() })
+        }
+
+        composable(route = Screen.Stats.route) {
+            StatsScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Screen.Trash.route) {
+            TrashScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable(
@@ -56,19 +78,24 @@ fun NavGraph(
             )
         }
 
-        composable(
-            route = Screen.AddEditNote.route,
-            arguments = listOf(navArgument("noteId") {
-                type = NavType.IntType
-                defaultValue = -1
-            })
-        ) { backStackEntry ->
-            val noteId = backStackEntry.arguments?.getInt("noteId") ?: -1
-            AddEditNoteScreen(
-                noteId = noteId,
+        composable(route = Screen.NoteList.route) {
+            NoteListScreen(
                 viewModel = viewModel,
-                onSaveClick = { navController.popBackStack() },
-                onBackClick = { navController.popBackStack() }
+                onNoteClick = { noteId ->
+                    navController.navigate(Screen.NoteDetail.createRoute(noteId))
+                },
+                onAddClick = {
+                    navController.navigate(Screen.AddEditNote.createRoute())
+                },
+                onAboutClick = {
+                    navController.navigate(Screen.About.route)
+                },
+                onStatsClick = {
+                    navController.navigate(Screen.Stats.route)
+                },
+                onTrashClick = {
+                    navController.navigate(Screen.Trash.route)
+                }
             )
         }
     }

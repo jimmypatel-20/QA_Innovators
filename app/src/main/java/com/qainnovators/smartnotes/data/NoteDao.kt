@@ -20,27 +20,33 @@ interface NoteDao {
     @Delete
     suspend fun deleteNote(note: Note)
 
-    @Query("SELECT * FROM notes ORDER BY isPinned DESC, timestamp DESC")
+    @Query("SELECT * FROM notes WHERE isTrashed = 0 ORDER BY isPinned DESC, timestamp DESC")
     fun getAllNotes(): Flow<List<Note>>
+
+    @Query("SELECT * FROM notes WHERE isTrashed = 1 ORDER BY lastEdited DESC")
+    fun getTrashedNotes(): Flow<List<Note>>
+
+    @Query("DELETE FROM notes WHERE isTrashed = 1")
+    suspend fun clearTrash()
 
     @Query("SELECT * FROM notes WHERE id = :id")
     suspend fun getNoteById(id: Int): Note?
 
-    @Query("SELECT * FROM notes WHERE category = :category ORDER BY isPinned DESC, timestamp DESC")
+    @Query("SELECT * FROM notes WHERE isTrashed = 0 AND category = :category ORDER BY isPinned DESC, timestamp DESC")
     fun getNotesByCategory(category: String): Flow<List<Note>>
 
-    @Query("SELECT * FROM notes WHERE title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%' ORDER BY isPinned DESC, timestamp DESC")
+    @Query("SELECT * FROM notes WHERE isTrashed = 0 AND (title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%') ORDER BY isPinned DESC, timestamp DESC")
     fun searchNotes(query: String): Flow<List<Note>>
 
-    @Query("SELECT * FROM notes ORDER BY isPinned DESC, title ASC")
+    @Query("SELECT * FROM notes WHERE isTrashed = 0 ORDER BY isPinned DESC, title ASC")
     fun getNotesSortedByTitleAsc(): Flow<List<Note>>
 
-    @Query("SELECT * FROM notes ORDER BY isPinned DESC, timestamp ASC")
+    @Query("SELECT * FROM notes WHERE isTrashed = 0 ORDER BY isPinned DESC, timestamp ASC")
     fun getNotesSortedByOldest(): Flow<List<Note>>
 
-    @Query("SELECT * FROM notes WHERE isFavourite = 1 ORDER BY timestamp DESC")
+    @Query("SELECT * FROM notes WHERE isFavourite = 1 AND isTrashed = 0 ORDER BY timestamp DESC")
     fun getFavouriteNotes(): Flow<List<Note>>
 
-    @Query("SELECT * FROM notes WHERE isPinned = 1 ORDER BY timestamp DESC")
+    @Query("SELECT * FROM notes WHERE isPinned = 1 AND isTrashed = 0 ORDER BY timestamp DESC")
     fun getPinnedNotes(): Flow<List<Note>>
 }

@@ -151,6 +151,22 @@ fun NoteDetailScreen(
                                 note?.let { viewModel.toggleFavourite(it) }
                             }
                         )
+                        // Duplicate
+                        DropdownMenuItem(
+                            text = { Text("Duplicate note") },
+                            leadingIcon = {
+                                Icon(Icons.Default.ContentCopy, contentDescription = null)
+                            },
+                            onClick = {
+                                showMenu = false
+                                note?.let {
+                                    viewModel.duplicateNote(it)
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Note duplicated")
+                                    }
+                                }
+                            }
+                        )
                         HorizontalDivider()
                         // Delete
                         DropdownMenuItem(
@@ -512,7 +528,7 @@ fun NoteDetailScreen(
                     title = { Text("Delete Note") },
                     text = {
                         Text(
-                            "Are you sure you want to delete \"${currentNote.title}\"? This cannot be undone."
+                            "Move \"${currentNote.title}\" to trash? You can restore it from the Trash screen."
                         )
                     },
                     confirmButton = {
@@ -523,7 +539,7 @@ fun NoteDetailScreen(
                                 onDeleteClick()
                             }
                         ) {
-                            Text("Delete", color = MaterialTheme.colorScheme.error)
+                            Text("Move to Trash", color = MaterialTheme.colorScheme.error)
                         }
                     },
                     dismissButton = {

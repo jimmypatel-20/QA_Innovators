@@ -32,7 +32,9 @@ fun NoteListScreen(
     viewModel: NoteViewModel,
     onNoteClick: (Int) -> Unit,
     onAddClick: () -> Unit,
-    onAboutClick: () -> Unit
+    onAboutClick: () -> Unit,
+    onStatsClick: () -> Unit,
+    onTrashClick: () -> Unit
 ) {
     val notes by viewModel.allNotes.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -93,6 +95,26 @@ fun NoteListScreen(
                             onClick = {
                                 viewModel.toggleDarkMode()
                                 showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Statistics") },
+                            leadingIcon = {
+                                Icon(Icons.Default.BarChart, contentDescription = null)
+                            },
+                            onClick = {
+                                showMenu = false
+                                onStatsClick()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Trash") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Delete, contentDescription = null)
+                            },
+                            onClick = {
+                                showMenu = false
+                                onTrashClick()
                             }
                         )
                         DropdownMenuItem(
@@ -242,7 +264,6 @@ fun NoteListScreen(
                     }
                 }
             } else {
-                // Notes count label
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -276,12 +297,12 @@ fun NoteListScreen(
                                 viewModel.deleteNote(note)
                                 scope.launch {
                                     val result = snackbarHostState.showSnackbar(
-                                        message = "Note deleted",
+                                        message = "Note moved to trash",
                                         actionLabel = "Undo",
                                         duration = SnackbarDuration.Short
                                     )
                                     if (result == SnackbarResult.ActionPerformed) {
-                                        viewModel.insertNote(note)
+                                        viewModel.restoreNote(note)
                                     }
                                 }
                             }
@@ -362,7 +383,7 @@ fun SwipeToDeleteNoteCard(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "Delete",
+                                text = "Move to Trash",
                                 color = MaterialTheme.colorScheme.onErrorContainer,
                                 style = MaterialTheme.typography.labelLarge
                             )

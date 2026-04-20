@@ -14,6 +14,7 @@ data class Note(
     val isPinned: Boolean = false,
     val isFavourite: Boolean = false,
     val isLocked: Boolean = false,
+    val isTrashed: Boolean = false,
     val timestamp: Long = System.currentTimeMillis(),
     val lastEdited: Long = System.currentTimeMillis()
 )
