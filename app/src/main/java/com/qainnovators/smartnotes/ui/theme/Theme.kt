@@ -20,27 +20,24 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = White,
     primaryContainer = Purple90,
     onPrimaryContainer = Purple10,
-
     secondary = PurpleGrey40,
     onSecondary = White,
     secondaryContainer = PurpleGrey90,
     onSecondaryContainer = PurpleGrey10,
-
     tertiary = Pink40,
     onTertiary = White,
     tertiaryContainer = Pink90,
     onTertiaryContainer = Pink10,
-
     error = Red40,
     onError = White,
     errorContainer = Red90,
     onErrorContainer = Red10,
-
     background = Background,
     onBackground = Black,
     surface = Surface,
     onSurface = Black,
     onSurfaceVariant = PurpleGrey40,
+    surfaceVariant = Purple95,
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -48,27 +45,24 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = Purple20,
     primaryContainer = Purple30,
     onPrimaryContainer = Purple90,
-
     secondary = PurpleGrey80,
     onSecondary = PurpleGrey20,
     secondaryContainer = PurpleGrey40,
     onSecondaryContainer = PurpleGrey90,
-
     tertiary = Pink80,
     onTertiary = Pink20,
     tertiaryContainer = Pink40,
     onTertiaryContainer = Pink90,
-
     error = Red80,
     onError = Red20,
     errorContainer = Red40,
     onErrorContainer = Red90,
-
-    background = Black,
+    background = DarkBackground,
     onBackground = White,
-    surface = Black,
+    surface = DarkSurface,
     onSurface = White,
     onSurfaceVariant = PurpleGrey80,
+    surfaceVariant = PurpleGrey20,
 )
 
 @Composable
@@ -92,7 +86,9 @@ fun SmartNotesManagerTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat
+                .getInsetsController(window, view)
+                .isAppearanceLightStatusBars = !darkTheme
         }
     }
 
